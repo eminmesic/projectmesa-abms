@@ -4,7 +4,7 @@ from mesa.visualization.modules import CanvasGrid, ChartModule, TextElement
 from wood_carving.model import WoodCarvingModel
 
 
-class HappyElement(TextElement):
+class CarverElement(TextElement):
     '''
     Display a text count of how many happy agents there are.
     '''
@@ -27,11 +27,11 @@ def carving_draw(agent):
         portrayal["Color"] = "Blue"
     return portrayal
 
-happy_element = HappyElement()
-canvas_element = CanvasGrid(carving_draw, 20, 20, 600, 600)
-happy_chart = ChartModule([{"Label": "happy", "Color": "Black"}])
+carver_element = CarverElement()
+canvas_element = CanvasGrid(carving_draw, 20, 20, 500, 500)
+carver_chart = ChartModule([{"Label": "happy", "Color": "Black"}])
 
 server = ModularServer(WoodCarvingModel,
-                       [canvas_element, happy_element, happy_chart],
+                       [canvas_element, carver_element, carver_chart],
                        "Wood-carving Model",
                        20, 20, 0.8, 0.2, 4)
