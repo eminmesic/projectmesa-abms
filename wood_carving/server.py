@@ -10,7 +10,7 @@ class HappyElement(TextElement):
     '''
 
     def render(self, model):
-        return "Happy agents: " + str(model.happy)
+        return "Mentor carvers: " + str(model.happy)
 
 
 def carving_draw(agent):
@@ -28,7 +28,7 @@ def carving_draw(agent):
     return portrayal
 
 happy_element = HappyElement()
-canvas_element = CanvasGrid(carving_draw, 20, 20, 500, 500)
+canvas_element = CanvasGrid(carving_draw, 20, 20, 600, 600)
 happy_chart = ChartModule([{"Label": "happy", "Color": "Black"}])
 
 server = ModularServer(WoodCarvingModel,
