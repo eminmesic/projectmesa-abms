@@ -57,7 +57,7 @@ class WoodCarvingModel(Model):
 
         self.happy = 0
         self.datacollector = DataCollector(
-            {"happy": lambda m: m.happy},  # Model-level count of happy agents
+            {"mentor": lambda m: m.happy},  # Model-level count of happy agents
             # For testing purposes, agent's individual x and y
             {"x": lambda a: a.pos[0], "y": lambda a: a.pos[1]})
 

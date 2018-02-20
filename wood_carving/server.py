@@ -29,7 +29,7 @@ def carving_draw(agent):
 
 carver_element = CarverElement()
 canvas_element = CanvasGrid(carving_draw, 20, 20, 500, 500)
-carver_chart = ChartModule([{"Label": "happy", "Color": "Black"}])
+carver_chart = ChartModule([{"Label": "mentor", "Color": "Black"}])
 
 server = ModularServer(WoodCarvingModel,
                        [canvas_element, carver_element, carver_chart],
