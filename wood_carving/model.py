@@ -1,91 +1,48 @@
 import random
 
 from mesa import Model, Agent
-from mesa.time import RandomActivation
-from mesa.space import SingleGrid
+from mesa.space import MultiGrid
 from mesa.datacollection import DataCollector
 
+class Artisan(Agent):
+    grid = None
+    x = None
+    y = None
+    more = True
+    energy = None
 
-class WoodCarvingAgent(Agent):
-    '''
-    Wood-carving agent
-    '''
-    def __init__(self, pos, model, agent_type):
-        '''
-         Create a new agent.
-
-         Args:
-            unique_id: Unique identifier for the agent.
-            x, y: Agent initial location.
-            agent_type: Indicator for the agent's type (minority=1, majority=0)
-        '''
+    def __init__(self, pos, model, more=True, energy = None):
         super().__init__(pos, model)
         self.pos = pos
-        self.type = agent_type
+        self.more = more
+        self.energy = energy
+
+    def random_move(self):
+        next_moves = self.model.grid.get_neighborhood(self.pos, self.more, True)
+        next_move = random.choice(next_moves)
+        self.model.grid.move_agent(self, next_move)
 
     def step(self):
-        similar = 0
-        neighbors = self.model.grid.neighbor_iter(self.pos)
-        for neighbor in neighbors:
-            if neighbor.type == self.type:
-                similar += 1
+        self.random_move()
+        living = True
 
-        # If unhappy, move:
-        if similar < self.model.homophily:
-            self.model.grid.move_to_empty(self)
-        else:
-            self.model.happy += 1
+class ArtisanLearner(Model):
+    height = 20
+    width = 20
 
+    knowledge = 0
+    sex = None
 
-class WoodCarvingModel(Model):
-    '''
-    Model class for the wood-carving model.
-    '''
+    verbose = False
 
-    def __init__(self, height, width, density, minority_pc, homophily):
-        '''
-        '''
+    description = 'A model for simulating Artisan and Learner relationship'
 
+    def __init__(self, height=20, width=20, 
+                       knowledge=0, sex=None):
+        
         self.height = height
         self.width = width
-        self.density = density
-        self.minority_pc = minority_pc
-        self.homophily = homophily
+        self.knowledge = knowledge
+        self.sex = sex
 
-        self.schedule = RandomActivation(self)
-        self.grid = SingleGrid(height, width, torus=True)
-
-        self.happy = 0
-        self.datacollector = DataCollector(
-            {"mentor": lambda m: m.happy},  # Model-level count of happy agents
-            # For testing purposes, agent's individual x and y
-            {"x": lambda a: a.pos[0], "y": lambda a: a.pos[1]})
-
-        self.running = True
-
-        # Set up agents
-        # We use a grid iterator that returns
-        # the coordinates of a cell as well as
-        # its contents. (coord_iter)
-        for cell in self.grid.coord_iter():
-            x = cell[1]
-            y = cell[2]
-            if random.random() < self.density:
-                if random.random() < self.minority_pc:
-                    agent_type = 1
-                else:
-                    agent_type = 0
-
-                agent = WoodCarvingAgent((x, y), self, agent_type)
-                self.grid.position_agent(agent, (x, y))
-                self.schedule.add(agent)
-
-    def step(self):
-        '''
-        Run one step of the model. If All agents are happy, halt the model.
-        '''
-        self.happy = 0  # Reset counter of happy agents
-        self.schedule.step()
-        self.datacollector.collect(self)
-        if self.happy == self.schedule.get_agent_count():
-            self.running = False
+        self.grid = MultiGrid(self.height, self.width, torus=True)

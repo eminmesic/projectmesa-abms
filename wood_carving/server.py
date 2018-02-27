@@ -1,37 +1,30 @@
 from mesa.visualization.ModularVisualization import ModularServer
-from mesa.visualization.modules import CanvasGrid, ChartModule, TextElement
+from mesa.visualization.modules import CanvasGrid, ChartModule
+from mesa.visualization.UserParam import UserSettableParameter
 
-from wood_carving.model import WoodCarvingModel
+from wood_carving.model import Artisan, ArtisanLearner
 
-
-class CarverElement(TextElement):
-    '''
-    Display a text count of how many happy agents there are.
-    '''
-
-    def render(self, model):
-        return "Mentor carvers: " + str(model.happy)
-
-
-def carving_draw(agent):
-    '''
-    Portrayal Method for canvas
-    '''
+def artisan_learner_portrayal(agent):
     if agent is None:
         return
-    portrayal = {"Shape": "circle", "r": 0.5, "Filled": "true", "Layer": 0}
 
-    if agent.type == 0:
-        portrayal["Color"] = "Green"
-    else:
-        portrayal["Color"] = "Blue"
+    portrayal = {}
+
+    # if type(agent) is Artisan:
+    #     portrayal["Shape"] = "wolf_sheep/resources/sheep.png"
+    #     # https://icons8.com/web-app/433/sheep
+    #     portrayal["scale"] = 0.9
+    #     portrayal["Layer"] = 1
+
+    # Definition of portrayal here
+
     return portrayal
 
-carver_element = CarverElement()
-canvas_element = CanvasGrid(carving_draw, 20, 20, 500, 500)
-carver_chart = ChartModule([{"Label": "mentor", "Color": "Black"}])
+canvas_element = CanvasGrid(artisan_learner_portrayal, 20, 20, 500, 500)
+chart_element = ChartModule([{"Label": "Artisan", "Color": "#AA0000"}])
 
-server = ModularServer(WoodCarvingModel,
-                       [canvas_element, carver_element, carver_chart],
-                       "Wood-carving Model",
-                       20, 20, 0.8, 0.2, 4)
+model_params = {"sex": UserSettableParameter('checkbox', 'Sex', True),
+                "knowledge": UserSettableParameter('slider', 'Knowledge', 20, 1, 100)}
+
+server = ModularServer(ArtisanLearner, [canvas_element, chart_element], "Artisan Learner Relationship", model_params)
+server.port = 8521
