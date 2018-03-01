@@ -9,13 +9,11 @@ class Artisan(Agent):
     x = None
     y = None
     more = True
-    energy = None
 
-    def __init__(self, pos, model, more=True, energy = None):
+    def __init__(self, pos, model, more=True):
         super().__init__(pos, model)
         self.pos = pos
         self.more = more
-        self.energy = energy
 
     def random_move(self):
         next_moves = self.model.grid.get_neighborhood(self.pos, self.more, True)
@@ -24,25 +22,52 @@ class Artisan(Agent):
 
     def step(self):
         self.random_move()
-        living = True
+        living = True    
 
-class ArtisanLearner(Model):
+class ArtisanLearnerRelation(Model):
     height = 20
     width = 20
 
-    knowledge = 0
-    sex = None
+    initial_artisan_expert = 20
+    initial_artisan_learner = 10
 
     verbose = False
 
-    description = 'A model for simulating Artisan and Learner relationship'
+    description = 'A model for simulating Artisan and Learner relation.'
 
-    def __init__(self, height=20, width=20, 
-                       knowledge=0, sex=None):
+    def __init__(self, height=20, width=20,
+                 initial_artisan_expert=20, initial_artisan_learner=10):
         
         self.height = height
         self.width = width
-        self.knowledge = knowledge
-        self.sex = sex
+        self.initial_artisan_expert = initial_artisan_expert
+        self.initial_artisan_learner = initial_artisan_learner
 
         self.grid = MultiGrid(self.height, self.width, torus=True)
+        self.testattr = 0
+        self.datacollector = DataCollector(
+            {"testattr": "testattr"},  # Model-level count of happy agents
+            # For testing purposes, agent's individual x and y
+            {"x": lambda a: a.pos[0], "y": lambda a: a.pos[1]})
+
+        # Create artisan expert
+        for i in range(self.initial_artisan_expert):
+            x = random.randrange(self.width)
+            y = random.randrange(self.height)
+            artisanExpert = Artisan((x, y), self, True)
+            self.grid.place_agent(artisanExpert, (x, y))
+
+        # Create artisan learner
+        for i in range(self.initial_artisan_learner):
+            x = random.randrange(self.width)
+            y = random.randrange(self.height)
+            artisanLearner = Artisan((x, y), self, True)
+            self.grid.place_agent(artisanLearner, (x, y))
+
+        self.running = True
+        # self.datacollector.collect(self)
+
+        def step(self):
+            # self.schedule.step()
+            # collect data
+            self.datacollector.collect(self)
