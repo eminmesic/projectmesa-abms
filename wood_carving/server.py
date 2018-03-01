@@ -23,7 +23,7 @@ def artisan_learner_portrayal(agent):
 canvas_element = CanvasGrid(artisan_learner_portrayal, 20, 20, 500, 500)
 chart_element = ChartModule([{"Label": "Artisan", "Color": "#AA0000"}])
 
-model_params = {"sex": UserSettableParameter('checkbox', 'Sex', True),
+model_params = {"sex": UserSettableParameter('checkbox', 'Gender', True),
                 "knowledge": UserSettableParameter('slider', 'Knowledge', 20, 1, 100)}
 
 server = ModularServer(ArtisanLearner, [canvas_element, chart_element], "Artisan Learner Relationship", model_params)
