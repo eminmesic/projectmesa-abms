@@ -50,6 +50,7 @@ class ArtisanModel(Model):
         self.running = True
 
     def step(self):
+        self.running = True
         self.schedule.step()
 
         if self.schedule.get_agent_count() == 0:
