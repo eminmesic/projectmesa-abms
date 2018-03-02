@@ -1,3 +1,3 @@
-from wood_carving.server import server
+from server import server
 
 server.launch()
