@@ -6,20 +6,32 @@ from mesa.space import MultiGrid
 from mesa.datacollection import DataCollector
 
 class ArtisanAgent(Agent):
-    def __init__(self, unique_id, model, lifetime):
+    def __init__(self, unique_id, model, knowledge):
         super().__init__(unique_id, model)
-        self.lifetime = lifetime
-        self.age = random.randrange(15, self.lifetime)
+        self.age = random.randrange(15, self.model.average_lifetime)
+        self.knowledge = knowledge
+
+    def get_title(self):
+        if self.knowledge < 0.4:
+            return "apprentice"
+        elif self.knowledge >= 0.4 and self.knowledge < 0.6:
+            return "master"
+        elif self.knowledge >= 0.6:
+            return "mentor"
 
     def step(self):
         self.move()
+        self.knowledge_transfer()
         self.age += 1
-
-        if self.age > self.lifetime:
+    
+        if self.age > self.model.average_lifetime:
             self.model.grid._remove_agent(self.pos, self)
             self.model.schedule.remove(self)
 
     def move(self):
+        if self.get_title() == "mentor":
+            return
+
         possible_steps = self.model.grid.get_neighborhood(
             self.pos,
             moore=True,
@@ -27,24 +39,37 @@ class ArtisanAgent(Agent):
         new_position = random.choice(possible_steps)
         self.model.grid.move_agent(self, new_position)
 
+    def knowledge_transfer(self):
+        cellmates = self.model.grid.get_cell_list_contents([self.pos])
+        # Need definition of transfering knowledge
+        pass
+
 class ArtisanModel(Model):
     description = 'A model for simulating Artisan and Learner relation.'
 
-    def __init__(self, width, height, average_lifetime):
+    def __init__(self, width, height, initial_artisan_mentor, initial_artisan_student, average_lifetime):
         self.height = height
         self.width = width
-        self.lifetime = average_lifetime
+        self.initial_artisan_mentor = initial_artisan_mentor
+        self.initial_artisan_student = initial_artisan_student
+        self.average_lifetime = average_lifetime
 
         self.schedule = RandomActivation(self)
         self.grid = MultiGrid(self.height, self.width, torus=True)
 
-        # Set up agents
-        for i in range(10):
-            x = random.randrange(self.width)
-            y = random.randrange(self.height)
+        unique_id = 0
+        # Set up mentors
+        for i in range(self.initial_artisan_mentor):
+            unique_id += 1
+            artisan = ArtisanAgent(unique_id, self, 0.6)
+            self.grid.place_agent(artisan, (random.randrange(self.width), random.randrange(self.height)))
+            self.schedule.add(artisan)
 
-            artisan = ArtisanAgent(i, self, self.lifetime)
-            self.grid.place_agent(artisan, (x, y))
+        # Set up other agents
+        for i in range(initial_artisan_student):
+            unique_id += 1
+            artisan = ArtisanAgent(unique_id, self, random.uniform(0, 0.4))
+            self.grid.place_agent(artisan, (random.randrange(self.width), random.randrange(self.height)))
             self.schedule.add(artisan)
         
         self.running = True
