@@ -3,15 +3,16 @@ from mesa.visualization.modules import CanvasGrid, ChartModule
 from mesa.visualization.UserParam import UserSettableParameter
 
 from model import ArtisanAgent, ArtisanModel
+from util import ArtisanType
 
 def artisan_portrayal(agent):
     portrayal = {"scale": 0.9, "Layer": 1}
 
-    if agent.get_title() == "apprentice":
+    if agent.get_title() == ArtisanType.APPRENTICE:
         portrayal["Shape"] = "images/apprentice.png"
-    elif agent.get_title() == "master":
+    elif agent.get_title() == ArtisanType.MASTER:
         portrayal["Shape"] = "images/master.png"
-    elif agent.get_title() == "mentor":
+    elif agent.get_title() == ArtisanType.MENTOR:
         portrayal["Shape"] = "images/mentor.png"
 
     return portrayal

@@ -4,6 +4,7 @@ from mesa import Model, Agent
 from mesa.time import RandomActivation
 from mesa.space import MultiGrid
 from mesa.datacollection import DataCollector
+from util import ArtisanType
 
 class ArtisanAgent(Agent):
     def __init__(self, unique_id, model, knowledge):
@@ -13,11 +14,11 @@ class ArtisanAgent(Agent):
 
     def get_title(self):
         if self.knowledge < 0.4:
-            return "apprentice"
+            return ArtisanType.APPRENTICE
         elif self.knowledge >= 0.4 and self.knowledge < 0.6:
-            return "master"
+            return ArtisanType.MASTER
         elif self.knowledge >= 0.6:
-            return "mentor"
+            return ArtisanType.MENTOR
 
     def step(self):
         self.move()
@@ -29,7 +30,7 @@ class ArtisanAgent(Agent):
             self.model.schedule.remove(self)
 
     def move(self):
-        if self.get_title() == "mentor":
+        if self.get_title() == ArtisanType.MENTOR:
             return
 
         possible_steps = self.model.grid.get_neighborhood(
