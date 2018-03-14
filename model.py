@@ -13,10 +13,10 @@ class ArtisanAgent(Agent):
         '''
         super().__init__(unique_id, model)
         self.lifetime = lifetime
-        self.age = random.randrange(15, self.lifetime)
+        self.age = random.randrange(15, self.lifetime) * 12 # month value
         self.knowledge = knowledge
-        self.learn_ability = random.choice([True, False])
-        self.teach_ability = random.choice([True, False])
+        self.learn_ability = random.uniform(0, 1)
+        self.teach_ability = random.uniform(0, 1)
 
     def get_title(self):
         '''
@@ -35,9 +35,9 @@ class ArtisanAgent(Agent):
         '''
         self.move()
         self.knowledge_transfer()
-        self.age += 1
+        self.age += self.model.step_time
     
-        if self.age > self.model.average_lifetime:
+        if self.age > (self.model.average_lifetime * 12):
             self.model.grid._remove_agent(self.pos, self)
             self.model.schedule.remove(self)
 
@@ -57,7 +57,12 @@ class ArtisanAgent(Agent):
 
     def knowledge_transfer(self):
         cellmates = self.model.grid.get_cell_list_contents([self.pos])
-        # Need definition of transfering knowledge
+        if len(cellmates) >= 2:
+            self.knowledge += 0.05
+            # Need definition of transfering knowledge
+        else:
+            # self learning
+            self.knowledge += 0.001
         pass
 
 class ArtisanModel(Model):
@@ -92,7 +97,7 @@ class ArtisanModel(Model):
             unique_id += 1
             lifetime = random.randrange(self.average_lifetime - 10, self.average_lifetime + 10)
             artisan = ArtisanAgent(unique_id, self, lifetime, 0.6)
-            self.grid.place_agent(artisan, (random.randrange(self.width), random.randrange(self.height)))
+            self.grid.place_agent(artisan, self.grid.find_empty())
             self.schedule.add(artisan)
 
         '''
