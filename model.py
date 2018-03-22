@@ -16,10 +16,10 @@ class ArtisanAgent(Agent):
         self.lifetime = lifetime
         self.age = age
         self.knowledge = knowledge
-        self.learn_ability = random.uniform(0, 1)
-        self.teach_ability = random.uniform(0, 1)
+        self.teach_ability = random.uniform(0.5, 1)
         self.affinity = random.uniform(0, 1)
         self.education = 0 # max education if 4 years (in months)
+        self.teacher = None
 
     def step(self):
         '''
@@ -50,15 +50,24 @@ class ArtisanAgent(Agent):
         if self.education >= 4 and self.knowledge < 0.2:
             self.remove_agent()
             return
+        elif self.education >= 4 and self.type == ArtisanType.APPRENTICE:
+            self.teacher = None
+            self.type = ArtisanType.MASTER
+        elif self.knowledge >= 0.6 and (self.type == ArtisanType.MASTER or self.type == ArtisanType.APPRENTICE):
+            self.teacher = None
+            self.model.grid.move_to_empty()
+            self.type = ArtisanType.MENTOR
 
-        cellmates = self.model.grid.get_cell_list_contents([self.pos])
-        if len(cellmates) >= 2:
-            self.knowledge += 0.05
-            # Need definition of transfering knowledge
+        if self.type == ArtisanType.APPRENTICE and self.teacher:
+            '''
+                Calculate knowled with formula 
+                (Zm - Zt) * M * L / t
+                (Mentor knowledge - Apprentice knowledge) * Mentor teach ability * Apprentice affinity / (year * month / step time)
+            '''
+            self.knowledge += (self.teacher.knowledge - self.knowledge) * self.teacher.teach_ability * self.affinity / (4 * 12 / self.model.step_time)
         else:
             # self learning
             self.knowledge += 0.001
-        pass
 
     def check_lifetime(self):
         '''
@@ -158,10 +167,13 @@ class ArtisanModel(Model):
                 if apprentice.affinity >= self.min_affinity:
                     possible_positions = self.grid.get_neighborhood(
                         mentor_position,
-                        moore=True,
-                        include_center=False)
+                        moore=False,
+                        include_center=True)
                     new_position = random.choice(possible_positions)
+                    apprentice.teacher = mentor
                     self.grid.move_agent(apprentice, new_position)
+                else:
+                    apprentice.remove_agent()
 
         if apprentice_agents:
            for apprentice in apprentice_agents:

@@ -19,9 +19,9 @@ def artisan_portrayal(agent):
     return portrayal
 
 # grid configuration
-grid_width = 5
-grid_height = 5
-grid = CanvasGrid(artisan_portrayal, grid_width, grid_height, 400, 400)
+grid_width = 10
+grid_height = 10
+grid = CanvasGrid(artisan_portrayal, grid_width, grid_height, 600, 600)
 
 # configure model params and form input values
 model_params = {"width": grid_width,
