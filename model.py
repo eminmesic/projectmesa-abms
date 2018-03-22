@@ -55,7 +55,7 @@ class ArtisanAgent(Agent):
             self.type = ArtisanType.MASTER
         elif self.knowledge >= 0.6 and (self.type == ArtisanType.MASTER or self.type == ArtisanType.APPRENTICE):
             self.teacher = None
-            self.model.grid.move_to_empty()
+            self.model.grid.move_to_empty(self)
             self.type = ArtisanType.MENTOR
 
         if self.type == ArtisanType.APPRENTICE and self.teacher:
@@ -67,7 +67,7 @@ class ArtisanAgent(Agent):
             self.knowledge += (self.teacher.knowledge - self.knowledge) * self.teacher.teach_ability * self.affinity / (4 * 12 / self.model.step_time)
         else:
             # self learning
-            self.knowledge += 0.001
+            self.knowledge += self.model.step_time / 12 * 0.015
 
     def check_lifetime(self):
         '''
@@ -98,10 +98,37 @@ class ArtisanModel(Model):
 
         self.schedule = RandomActivation(self)
         self.grid = MultiGrid(self.height, self.width, torus=True)
+        self.unique_id = 0
 
-        # agent must have unique id
-        unique_id = 0
+        self.generate_mentor()
+        self.generate_apprentice()
 
+        self.running = True
+        self.is_started = False
+        self.education_year = 0
+
+    def step(self):
+        '''
+            method executed for every step triggered automatically or manually
+        '''
+        self.running = True
+        self.education_year += self.step_time
+        if not self.is_started:
+            self.sort_apprentice()
+            self.is_started = True
+
+        self.schedule.step() #this method called same method of agent
+
+        if self.education_year % 48 == 0:
+            self.generate_apprentice()
+            self.sort_apprentice()
+
+        # some specific logic on model level
+        if self.schedule.get_agent_count() == 0:
+            self.running = False
+
+    def generate_mentor(self):
+            
         '''
             Set up mentors with specific configuration
             Configure unique id
@@ -110,13 +137,14 @@ class ArtisanModel(Model):
             Set newly created agent to the random position on grid and allow schedule
         '''
         for i in range(self.initial_artisan_mentor):
-            unique_id += 1
-            lifetime = random.randrange(self.average_lifetime - 10, self.average_lifetime + 10)
+            self.unique_id += 1
+            lifetime = random.randrange(15, self.average_lifetime + 10)
             age = float(random.randrange(15, lifetime))
-            artisan = ArtisanAgent(unique_id, self, ArtisanType.MENTOR, lifetime, age, 0.6)
+            artisan = ArtisanAgent(self.unique_id, self, ArtisanType.MENTOR, lifetime, age, 0.6)
             self.grid.place_agent(artisan, self.grid.find_empty())
             self.schedule.add(artisan)
 
+    def generate_apprentice(self):
         '''
             Set up other agents
             Configure unique id
@@ -124,37 +152,16 @@ class ArtisanModel(Model):
             Create agent
             Set newly created agent to the random position on grid and allow schedule
         '''
-        for i in range(initial_artisan_apprentice):
-            unique_id += 1
-            lifetime = random.randrange(self.average_lifetime - 10, self.average_lifetime + 10)
-            artisan = ArtisanAgent(unique_id, self, ArtisanType.APPRENTICE, lifetime, 15.0, 0)
+        for i in range(self.initial_artisan_apprentice):
+            self.unique_id += 1
+            lifetime = random.randrange(15, self.average_lifetime + 10)
+            artisan = ArtisanAgent(self.unique_id, self, ArtisanType.APPRENTICE, lifetime, 15.0, 0)
             self.grid.place_agent(artisan, (random.randrange(self.width), random.randrange(self.height)))
             self.schedule.add(artisan)
-        
-        self.running = True
-        self.is_started = False
-
-    def step(self):
-        '''
-            method executed for every step triggered automatically or manually
-        '''
-        self.running = True
-        if not self.is_started:
-            self.sort_apprentice()
-            self.is_started = True
-
-        self.schedule.step() #this method called same method of agent
-
-        # some specific logic on model level
-        if self.schedule.get_agent_count() == 0:
-            self.running = False
     
     def sort_apprentice(self):
-        mentor_agents = [x for x in self.schedule.agents if x.type == ArtisanType.MENTOR]
-        apprentice_agents = [x for x in self.schedule.agents if x.type == ArtisanType.APPRENTICE]
-
         mentor_agents = sorted([x for x in self.schedule.agents if x.type == ArtisanType.MENTOR], key=lambda m: m.affinity, reverse=True)
-        apprentice_agents = sorted([x for x in self.schedule.agents if x.type == ArtisanType.APPRENTICE], key=lambda m: m.affinity, reverse=False)
+        apprentice_agents = sorted([x for x in self.schedule.agents if x.type == ArtisanType.APPRENTICE and x.teacher == None], key=lambda m: m.affinity, reverse=False)
 
         for mentor in mentor_agents:
             mentor_position = mentor.pos
