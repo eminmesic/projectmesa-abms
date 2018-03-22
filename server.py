@@ -22,6 +22,9 @@ def artisan_portrayal(agent):
 grid_width = 15
 grid_height = 15
 grid = CanvasGrid(artisan_portrayal, grid_width, grid_height, 600, 600)
+chart = ChartModule([{"Label": "Apprentice", "Color": "#000000"},
+                     {"Label": "Master", "Color": "#6D0000"},
+                     {"Label": "Mentor", "Color": "#996459"}], data_collector_name="total_collector")
 
 # configure model params and form input values
 model_params = {"width": grid_width,
@@ -32,5 +35,5 @@ model_params = {"width": grid_width,
                 "step_time": UserSettableParameter('slider', 'Step time (month)', 6, 3, 12, 3),
                 "average_lifetime": UserSettableParameter('slider', 'Average lifetime', 65, 50, 100)}
 
-server = ModularServer(ArtisanModel, [grid], "Artisan Learner Relation", model_params)
+server = ModularServer(ArtisanModel, [grid, chart], "Artisan Learner Relation", model_params)
 server.port = 8521

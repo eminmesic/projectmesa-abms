@@ -53,7 +53,7 @@ class ArtisanAgent(Agent):
         elif self.education >= 4 and self.type == ArtisanType.APPRENTICE:
             self.teacher = None
             self.type = ArtisanType.MASTER
-        elif self.knowledge >= 0.6 and (self.type == ArtisanType.MASTER or self.type == ArtisanType.APPRENTICE):
+        elif self.knowledge >= 0.75 and (self.type == ArtisanType.MASTER or self.type == ArtisanType.APPRENTICE):
             self.teacher = None
             self.model.grid.move_to_empty(self)
             self.type = ArtisanType.MENTOR
@@ -98,6 +98,10 @@ class ArtisanModel(Model):
 
         self.schedule = RandomActivation(self)
         self.grid = MultiGrid(self.height, self.width, torus=True)
+        self.total_collector = DataCollector(
+            {"Apprentice": lambda m: len([x for x in self.schedule.agents if x.type == ArtisanType.APPRENTICE]),
+             "Master": lambda m: len([x for x in self.schedule.agents if x.type == ArtisanType.MASTER]),
+             "Mentor": lambda m: len([x for x in self.schedule.agents if x.type == ArtisanType.MENTOR])})
         self.unique_id = 0
 
         self.generate_mentor()
@@ -123,6 +127,10 @@ class ArtisanModel(Model):
             self.generate_apprentice()
             self.sort_apprentice()
 
+        # refresh total data collector every year
+        if self.education_year % 12 == 0:
+            self.total_collector.collect(self)
+
         # some specific logic on model level
         if self.schedule.get_agent_count() == 0:
             self.running = False
@@ -140,7 +148,7 @@ class ArtisanModel(Model):
             self.unique_id += 1
             lifetime = random.randrange(15, self.average_lifetime + 10)
             age = float(random.randrange(15, lifetime))
-            artisan = ArtisanAgent(self.unique_id, self, ArtisanType.MENTOR, lifetime, age, 0.6)
+            artisan = ArtisanAgent(self.unique_id, self, ArtisanType.MENTOR, lifetime, age, 0.75)
             self.grid.place_agent(artisan, self.grid.find_empty())
             self.schedule.add(artisan)
 
