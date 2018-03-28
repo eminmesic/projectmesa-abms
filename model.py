@@ -36,7 +36,7 @@ class ArtisanAgent(Agent):
         '''
             Method set the configuration of moving our agent over the grid
         '''
-        if self.type == ArtisanType.MENTOR or self.type == ArtisanType.APPRENTICE:
+        if self.type == ArtisanType.MENTOR or (self.type == ArtisanType.APPRENTICE and self.teacher != None):
             return
 
         possible_steps = self.model.grid.get_neighborhood(
@@ -48,7 +48,7 @@ class ArtisanAgent(Agent):
 
     def knowledge_transfer(self):
         if self.education >= 4 and self.knowledge < 0.2:
-            self.remove_agent()
+            self.teacher = None
             return
         elif self.education >= 4 and self.type == ArtisanType.APPRENTICE:
             self.teacher = None
@@ -83,16 +83,17 @@ class ArtisanAgent(Agent):
 class ArtisanModel(Model):
     description = 'A model for simulating Artisan and Learner relation.'
 
-    def __init__(self, width, height, initial_artisan_mentor, initial_artisan_apprentice, min_affinity, step_time, average_lifetime):
+    def __init__(self, width, height, disaster, initial_artisan_mentor, initial_artisan_apprentice, max_apprentice_per_mentor, step_time, average_lifetime):
         '''
             Constructor method of our model
             Create model and configure with model parameters
         '''
         self.height = height
         self.width = width
+        self.disaster = disaster
         self.initial_artisan_mentor = initial_artisan_mentor
         self.initial_artisan_apprentice = initial_artisan_apprentice
-        self.min_affinity = min_affinity
+        self.max_apprentice_per_mentor = max_apprentice_per_mentor
         self.step_time = step_time
         self.average_lifetime = average_lifetime
 
@@ -118,14 +119,14 @@ class ArtisanModel(Model):
         self.running = True
         self.education_year += self.step_time
         if not self.is_started:
-            self.sort_apprentice()
+            self.filter_apprentice()
             self.is_started = True
 
         self.schedule.step() #this method called same method of agent
 
         if self.education_year % 48 == 0:
             self.generate_apprentice()
-            self.sort_apprentice()
+            self.filter_apprentice()
 
         # refresh total data collector every year
         if self.education_year % 12 == 0:
@@ -166,30 +167,33 @@ class ArtisanModel(Model):
             artisan = ArtisanAgent(self.unique_id, self, ArtisanType.APPRENTICE, lifetime, 15.0, 0)
             self.grid.place_agent(artisan, (random.randrange(self.width), random.randrange(self.height)))
             self.schedule.add(artisan)
+
+    def mentor_apprentice_count(self, mentor):
+        count = 0
+        apprentice_agents = sorted([x for x in self.schedule.agents if x.type == ArtisanType.APPRENTICE and x.teacher == None], key=lambda m: m.affinity, reverse=False)
+
+        for apprentice in apprentice_agents:
+            if apprentice.teacher == mentor:
+                count += 1
+
+        return count
     
-    def sort_apprentice(self):
+    def filter_apprentice(self):
         mentor_agents = sorted([x for x in self.schedule.agents if x.type == ArtisanType.MENTOR], key=lambda m: m.affinity, reverse=True)
         apprentice_agents = sorted([x for x in self.schedule.agents if x.type == ArtisanType.APPRENTICE and x.teacher == None], key=lambda m: m.affinity, reverse=False)
 
         for mentor in mentor_agents:
             mentor_position = mentor.pos
 
-            for i in range(5):
+            for i in range(self.max_apprentice_per_mentor - self.mentor_apprentice_count(mentor)):
                 if not apprentice_agents:
                     break
 
                 apprentice = apprentice_agents.pop()
-                if apprentice.affinity >= self.min_affinity:
-                    possible_positions = self.grid.get_neighborhood(
-                        mentor_position,
-                        moore=False,
-                        include_center=True)
-                    new_position = random.choice(possible_positions)
-                    apprentice.teacher = mentor
-                    self.grid.move_agent(apprentice, new_position)
-                else:
-                    apprentice.remove_agent()
-
-        if apprentice_agents:
-           for apprentice in apprentice_agents:
-                apprentice.remove_agent()
+                possible_positions = self.grid.get_neighborhood(
+                    mentor_position,
+                    moore=False,
+                    include_center=True)
+                new_position = random.choice(possible_positions)
+                apprentice.teacher = mentor
+                self.grid.move_agent(apprentice, new_position)
