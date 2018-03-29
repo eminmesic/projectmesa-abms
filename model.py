@@ -128,9 +128,8 @@ class ArtisanModel(Model):
             self.generate_apprentice()
             self.filter_apprentice()
 
-        # refresh total data collector every year
-        if self.education_year % 12 == 0:
-            self.total_collector.collect(self)
+        # refresh total data collector
+        self.total_collector.collect(self)
 
         # some specific logic on model level
         if self.schedule.get_agent_count() == 0:

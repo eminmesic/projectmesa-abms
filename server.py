@@ -39,9 +39,9 @@ chart = ChartModule([{"Label": "Apprentice", "Color": "#000000"},
 # configure model params and form input values
 model_params = {"width": grid_width,
                 "height": grid_height,
-                "disaster": UserSettableParameter('checkbox', 'Disaster', True),
+                "disaster": UserSettableParameter('checkbox', 'Disaster', False),
                 "initial_artisan_mentor": UserSettableParameter('slider', 'Intial artisan mentors', 2, 1, 15),
-                "initial_artisan_apprentice": UserSettableParameter('slider', 'Intial artisan apprentice', 10, 1, 1000),
+                "initial_artisan_apprentice": UserSettableParameter('slider', 'Intial artisan apprentice', 10, 5, 1000, 5),
                 "max_apprentice_per_mentor": UserSettableParameter('slider', 'Max apprentice per mentor', 5, 1, 20),
                 "step_time": UserSettableParameter('slider', 'Step time (month)', 6, 3, 12, 3),
                 "average_lifetime": UserSettableParameter('slider', 'Average lifetime', 65, 50, 100)}
