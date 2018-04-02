@@ -32,8 +32,8 @@ class ArtisanAgent(Agent):
         self.knowledge_transfer()
         self.check_lifetime()
 
-        # disaster every 100 years
-        if self.model.disaster and self.model.education_year % 1200 == 0:
+        # disaster logic if selected
+        if self.model.disaster != 0:
             if self.type == ArtisanType.APPRENTICE or self.type == ArtisanType.MASTER:
                 self.knowledge /= 2
             
@@ -112,8 +112,7 @@ class ArtisanModel(Model):
         self.total_collector = DataCollector(
             {"Apprentice": lambda m: len([x for x in self.schedule.agents if x.type == ArtisanType.APPRENTICE and x.teacher != None]),
              "Master": lambda m: len([x for x in self.schedule.agents if x.type == ArtisanType.MASTER]),
-             "Mentor": lambda m: len([x for x in self.schedule.agents if x.type == ArtisanType.MENTOR]),
-             "Other": lambda m: len([x for x in self.schedule.agents if x.type == ArtisanType.APPRENTICE and x.teacher == None])})
+             "Mentor": lambda m: len([x for x in self.schedule.agents if x.type == ArtisanType.MENTOR])})
         self.unique_id = 0
 
         self.generate_mentor()

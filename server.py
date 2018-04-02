@@ -40,13 +40,12 @@ canvas_height = canvas_calculation(grid_height)
 grid = CanvasGrid(artisan_portrayal, grid_width, grid_height, canvas_width, canvas_height)
 chart = ChartModule([{"Label": "Apprentice", "Color": "#000000"},
                      {"Label": "Master", "Color": "#6D0000"},
-                     {"Label": "Mentor", "Color": "#996459"},
-                     {"Label": "Other", "Color": "#744A25"}], data_collector_name="total_collector")
+                     {"Label": "Mentor", "Color": "#996459"}], data_collector_name="total_collector")
 
 # configure model params and form input values
 model_params = {"width": grid_width,
                 "height": grid_height,
-                "disaster": UserSettableParameter('checkbox', 'Disaster (every 100 years)', False),
+                "disaster": UserSettableParameter('slider', 'Disaster in years (0 - no disaster)', 0, 0, 100, 20),
                 "initial_artisan_mentor": UserSettableParameter('slider', 'Intial artisan mentors', 2, 1, 15),
                 "initial_artisan_apprentice": UserSettableParameter('slider', 'Intial artisan apprentice', 10, 5, 1000, 5),
                 "max_apprentice_per_mentor": UserSettableParameter('slider', 'Max apprentice per mentor', 5, 1, 20),
