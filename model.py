@@ -202,7 +202,7 @@ class ArtisanModel(Model):
                 possible_positions = self.grid.get_neighborhood(
                     mentor_position,
                     moore=False,
-                    include_center=True)
+                    include_center=False)
                 new_position = random.choice(possible_positions)
                 apprentice.teacher = mentor
                 self.grid.move_agent(apprentice, new_position)

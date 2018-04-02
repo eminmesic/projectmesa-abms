@@ -14,7 +14,7 @@ def canvas_calculation(grid):
 
 def artisan_portrayal(agent):
     # grid people configuration
-    portrayal = {"scale": 0.75, "text": round(agent.knowledge, 2)}
+    portrayal = {"scale": 1, "text": round(agent.knowledge, 2)}
 
     if agent.type == ArtisanType.APPRENTICE and agent.teacher != None:
         portrayal["Shape"] = "images/apprentice.png"
