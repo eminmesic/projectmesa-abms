@@ -32,14 +32,13 @@ class ArtisanAgent(Agent):
         self.knowledge_transfer()
         self.check_lifetime()
 
-        # disaster every 20 years
-        # if self.model.disaster and self.model.education_year % 240 == 0:
-        #     if self.type == ArtisanType.APPRENTICE:
-        #         self.knowledge /= 2
-        #     elif self.type == ArtisanType.MASTER:
-        #         self.knowledge /= 2
-        #         if self.knowledge < 0.4:
-        #             self.knowledge = 0.4
+        # disaster every 100 years
+        if self.model.disaster and self.model.education_year % 1200 == 0:
+            if self.type == ArtisanType.APPRENTICE or self.type == ArtisanType.MASTER:
+                self.knowledge /= 2
+            
+                if self.type == ArtisanType.MASTER and self.knowledge < 0.4:
+                    self.knowledge = 0.4
                 
     def move(self):
         '''
