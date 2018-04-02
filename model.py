@@ -77,6 +77,9 @@ class ArtisanAgent(Agent):
             # self learning
             self.knowledge += self.model.step_time / 12 * 0.015
 
+        if self.knowledge >= 1.0:
+            self.knowledge = 1
+
     def check_lifetime(self):
         '''
             Method check lifetime of agent and removes from model
