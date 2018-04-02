@@ -58,8 +58,7 @@ class ArtisanAgent(Agent):
     def knowledge_transfer(self):
         if self.education >= 4 and self.knowledge < 0.2:
             self.teacher = None
-            return
-        elif self.education >= 4 and self.type == ArtisanType.APPRENTICE:
+        elif self.knowledge >= 0.4 and self.type == ArtisanType.APPRENTICE:
             self.teacher = None
             self.type = ArtisanType.MASTER
         elif self.knowledge >= 0.75 and (self.type == ArtisanType.MASTER or self.type == ArtisanType.APPRENTICE):
