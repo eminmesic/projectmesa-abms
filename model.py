@@ -32,6 +32,15 @@ class ArtisanAgent(Agent):
         self.knowledge_transfer()
         self.check_lifetime()
 
+        # disaster every 20 years
+        # if self.model.disaster and self.model.education_year % 240 == 0:
+        #     if self.type == ArtisanType.APPRENTICE:
+        #         self.knowledge /= 2
+        #     elif self.type == ArtisanType.MASTER:
+        #         self.knowledge /= 2
+        #         if self.knowledge < 0.4:
+        #             self.knowledge = 0.4
+                
     def move(self):
         '''
             Method set the configuration of moving our agent over the grid
@@ -100,9 +109,10 @@ class ArtisanModel(Model):
         self.schedule = RandomActivation(self)
         self.grid = MultiGrid(self.height, self.width, torus=True)
         self.total_collector = DataCollector(
-            {"Apprentice": lambda m: len([x for x in self.schedule.agents if x.type == ArtisanType.APPRENTICE]),
+            {"Apprentice": lambda m: len([x for x in self.schedule.agents if x.type == ArtisanType.APPRENTICE and x.teacher != None]),
              "Master": lambda m: len([x for x in self.schedule.agents if x.type == ArtisanType.MASTER]),
-             "Mentor": lambda m: len([x for x in self.schedule.agents if x.type == ArtisanType.MENTOR])})
+             "Mentor": lambda m: len([x for x in self.schedule.agents if x.type == ArtisanType.MENTOR]),
+             "Other": lambda m: len([x for x in self.schedule.agents if x.type == ArtisanType.APPRENTICE and x.teacher == None])})
         self.unique_id = 0
 
         self.generate_mentor()

@@ -14,27 +14,34 @@ def canvas_calculation(grid):
 
 def artisan_portrayal(agent):
     # grid people configuration
-    portrayal = {"scale": 0.9, "Layer": 1}
+    portrayal = {"scale": 0.75, "text": round(agent.knowledge, 2)}
 
-    if agent.type == ArtisanType.APPRENTICE:
+    if agent.type == ArtisanType.APPRENTICE and agent.teacher != None:
         portrayal["Shape"] = "images/apprentice.png"
+        portrayal["Layer"] = 2
+    elif agent.type == ArtisanType.APPRENTICE:
+        portrayal["Shape"] = "images/apprentice_other.png"
+        portrayal["Layer"] = 1
     elif agent.type == ArtisanType.MASTER:
         portrayal["Shape"] = "images/master.png"
+        portrayal["Layer"] = 3
     elif agent.type == ArtisanType.MENTOR:
         portrayal["Shape"] = "images/mentor.png"
+        portrayal["Layer"] = 4
 
     return portrayal
 
 # grid configuration
-grid_width = int(input("Grid width: "))
-grid_height = int(input("Grid height: "))
+grid_width = 20#int(input("Grid width: "))
+grid_height = 20#int(input("Grid height: "))
 
 canvas_width = canvas_calculation(grid_width)
 canvas_height = canvas_calculation(grid_height)
 grid = CanvasGrid(artisan_portrayal, grid_width, grid_height, canvas_width, canvas_height)
 chart = ChartModule([{"Label": "Apprentice", "Color": "#000000"},
                      {"Label": "Master", "Color": "#6D0000"},
-                     {"Label": "Mentor", "Color": "#996459"}], data_collector_name="total_collector")
+                     {"Label": "Mentor", "Color": "#996459"},
+                     {"Label": "Other", "Color": "#744A25"}], data_collector_name="total_collector")
 
 # configure model params and form input values
 model_params = {"width": grid_width,
