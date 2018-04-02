@@ -75,7 +75,7 @@ class ArtisanAgent(Agent):
             self.knowledge += (self.teacher.knowledge - self.knowledge) * self.teacher.teach_ability * self.affinity / (4 * 12 / self.model.step_time)
         else:
             # self learning
-            self.knowledge += self.model.step_time / 12 * 0.015
+            self.knowledge += self.model.step_time / 12 * 0.015 * self.affinity
 
         if self.knowledge >= 1.0:
             self.knowledge = 1
