@@ -124,6 +124,8 @@ class ArtisanModel(Model):
         self.is_started = False
         self.education_year = 0
 
+        self.total_collector.collect(self)
+
     def step(self):
         '''
             method executed for every step triggered automatically or manually
