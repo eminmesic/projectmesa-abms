@@ -199,14 +199,7 @@ class ArtisanModel(Model):
             self.schedule.add(artisan)
 
     def mentor_apprentice_count(self, mentor):
-        count = 0
-        apprentice_agents = sorted([x for x in self.schedule.agents if x.type == ArtisanType.APPRENTICE and x.teacher == None], key=lambda m: m.affinity, reverse=False)
-
-        for apprentice in apprentice_agents:
-            if apprentice.teacher == mentor:
-                count += 1
-
-        return count
+        return len([x for x in self.schedule.agents if x.type == ArtisanType.APPRENTICE and x.teacher == mentor])
     
     def filter_apprentice(self):
         mentor_agents = sorted([x for x in self.schedule.agents if x.type == ArtisanType.MENTOR], key=lambda m: m.affinity, reverse=True)
