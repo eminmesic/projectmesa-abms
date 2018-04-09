@@ -93,7 +93,7 @@ class ArtisanAgent(Agent):
 class ArtisanModel(Model):
     description = 'A model for simulating Artisan and Learner relation.'
 
-    def __init__(self, width, height, disaster, initial_artisan_mentor, initial_artisan_apprentice, max_apprentice_per_mentor, step_time, average_lifetime):
+    def __init__(self, width, height, disaster, initial_artisan_mentor, initial_artisan_master, initial_artisan_apprentice, max_apprentice_per_mentor, step_time, average_lifetime):
         '''
             Constructor method of our model
             Create model and configure with model parameters
@@ -102,6 +102,7 @@ class ArtisanModel(Model):
         self.width = width
         self.disaster = disaster
         self.initial_artisan_mentor = initial_artisan_mentor
+        self.initial_artisan_master = initial_artisan_master
         self.initial_artisan_apprentice = initial_artisan_apprentice
         self.max_apprentice_per_mentor = max_apprentice_per_mentor
         self.step_time = step_time
@@ -116,6 +117,7 @@ class ArtisanModel(Model):
         self.unique_id = 0
 
         self.generate_mentor()
+        self.generate_master()
         self.generate_apprentice()
 
         self.running = True
@@ -156,9 +158,26 @@ class ArtisanModel(Model):
         '''
         for i in range(self.initial_artisan_mentor):
             self.unique_id += 1
-            lifetime = random.randrange(15, self.average_lifetime + 10)
+            lifetime = random.randrange(35, self.average_lifetime + 10)
             age = float(random.randrange(15, lifetime))
             artisan = ArtisanAgent(self.unique_id, self, ArtisanType.MENTOR, lifetime, age, 0.75)
+            self.grid.place_agent(artisan, self.grid.find_empty())
+            self.schedule.add(artisan)
+
+    def generate_master(self):
+                    
+        '''
+            Set up masters with specific configuration
+            Configure unique id
+            Generate random lifetime
+            Create agent
+            Set newly created agent to the random position on grid and allow schedule
+        '''
+        for i in range(self.initial_artisan_master):
+            self.unique_id += 1
+            lifetime = random.randrange(20, self.average_lifetime + 10)
+            age = float(random.randrange(15, lifetime))
+            artisan = ArtisanAgent(self.unique_id, self, ArtisanType.MASTER, lifetime, age, random.uniform(0.4, 0.75))
             self.grid.place_agent(artisan, self.grid.find_empty())
             self.schedule.add(artisan)
 
