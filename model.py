@@ -33,7 +33,7 @@ class ArtisanAgent(Agent):
         self.check_lifetime()
 
         # disaster logic if selected
-        if self.model.disaster != 0:
+        if self.model.disaster != 0 and self.model.education_year / 12 == self.model.disaster:
             if self.type == ArtisanType.APPRENTICE or self.type == ArtisanType.MASTER:
                 self.knowledge /= 2
             
